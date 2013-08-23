@@ -1,0 +1,8 @@
+name = Sum Operation
+description = Module provides operation Sum.
+core = 7.x
+package = CTools examples
+
+dependencies[] = ct_example
+
+files[] = plugins/operation/ct_example_sum_operation.inc

@@ -1,0 +1,9 @@
+name = Multiple/Divide Operations
+description = Module provides operations Multiple and Divide.
+core = 7.x
+package = CTools examples
+
+dependencies[] = ct_example
+
+files[] = ct_example_multiple_operation.inc
+files[] = ct_example_divide_operation.inc

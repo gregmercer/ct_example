@@ -1,0 +1,8 @@
+name = CTools Plugins Example
+description = Module provides custom ctools plugins.
+core = 7.x
+package = CTools examples
+
+dependencies[] = ctools
+
+files[] = ct_example_operation.inc

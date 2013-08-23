@@ -1,0 +1,140 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function ct_example_menu() {
+  $items = array();
+
+  $items['ct_example_calculations'] = array(
+    'title' => 'CTools Calculation plugins example',
+    'description' => "CTools plugins example.",
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ct_example_calculation'),
+    'access callback' => TRUE,
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implements hook_ctools_plugin_type().
+ *
+ * Has plenty options. See ctools/help/plugins-creating.html
+ */
+function ct_example_ctools_plugin_type() {
+  return array(
+    'operation' => array(
+      'use hooks' => TRUE,
+    ),
+  );
+}
+
+/**
+ * Form constructor for Calculations demo.
+ */
+function ct_example_calculation($form, $form_state) {
+  // Load all plugins type "operation".
+  ctools_include('plugins');
+  $operations = ctools_get_plugins('ct_example', 'operation');
+
+  $operation_options = array();
+
+  foreach ($operations as $id => $operation) {
+    $operation_options[$id] = $operation['label'];
+  }
+
+  if (empty($operation_options)) {
+    $form['message'] = array(
+      '#markup' => t('Sorry no operation plugins available in the system.'),
+    );
+    return $form;
+  }
+
+  $form['operations'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Please choose Operations'),
+    '#options' => $operation_options,
+  );
+
+  $form['number_a'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number A'),
+  );
+
+  $form['number_b'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number B'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Calculate'),
+  );
+
+  return $form;
+}
+
+/**
+ * Validate handler.
+ */
+function ct_example_calculation_validate($form, &$form_state) {
+  $fv = $form_state['values'];
+  $operations = array_filter($fv['operations']);
+
+  foreach ($operations as $operation) {
+    if ($instance = _ct_example_get_instance($operation, $fv['number_a'], $fv['number_b'])) {
+      $instance->validate();
+    }
+  }
+}
+
+/**
+ * Submit handler.
+ */
+function ct_example_calculation_submit($form, &$form_state) {
+  $fv = $form_state['values'];
+  $operations = array_filter($fv['operations']);
+
+  //dpm($operations);
+
+  foreach ($operations as $operation) {
+    if ($instance = _ct_example_get_instance($operation, $fv['number_a'], $fv['number_b'])) {
+      drupal_set_message($instance->resultMessage());
+    }
+  }
+}
+
+/**
+ * Retrieve object of main class of operation.
+ *
+ * @param type $id
+ * @param type $number_a
+ * @param type $number_b
+ * @return class
+ */
+function _ct_example_get_instance($id, $number_a = NULL, $number_b = NULL) {
+
+  dpm(__FUNCTION__);
+
+  $instances = &drupal_static(__FUNCTION__);
+
+  if (!isset($instances[$id])) {
+    ctools_include('plugins');
+    $plugin = ctools_get_plugins('ct_example', 'operation', $id);
+
+    dpm('plugin = ');
+    dpm($plugin);
+
+    $class = ctools_plugin_get_class($plugin, 'handler');
+    $instances[$id] = new $class($number_a, $number_b);
+
+    // Check that plugin class has inherited proper 'ct_example_operation' class.
+    if (!is_subclass_of($instances[$id], 'ct_example_operation')) {
+      $instances[$id] = NULL;
+    }
+  }
+
+  return $instances[$id];
+}

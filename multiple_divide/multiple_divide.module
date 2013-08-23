@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * Implements hook_ct_example_operation().
+ */
+function multiple_divide_ct_example_operation() {
+  return array(
+    'multiple' => array(
+      'label' => t('Multiple'),
+      'handler' => array(
+        'class' => 'ct_example_multiple_operation',
+      ),
+    ),
+    'divide' => array(
+      'label' => t('Divide'),
+      'handler' => array(
+        'class' => 'ct_example_divide_operation',
+      ),
+    ),
+  );
+}
